@@ -11,11 +11,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Unzip project
+      - name: Unzip project automatically
         run: |
-          unzip -q -o OtgFiles_SamsungOneUI.zip
-          if [ -d "OtgFiles_OneUI" ]; then cp -rf OtgFiles_OneUI/* .; fi
-          find . -maxdepth 4 -exec touch {} +
+          for z in *.zip; do [ -f "$z" ] && unzip -q -o "$z"; done
+          SETTINGS_PATH=$(find . -name "settings.gradle" | head -n 1)
+          PROJECT_DIR=$(dirname "$SETTINGS_PATH")
+          if [ "$PROJECT_DIR" != "." ]; then
+            cp -rf "$PROJECT_DIR"/* .
+          fi
+          find . -maxdepth 5 -exec touch {} +
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
