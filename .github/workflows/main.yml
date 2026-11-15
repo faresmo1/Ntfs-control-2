@@ -20,6 +20,7 @@ jobs:
             cp -rf "$PROJECT_DIR"/* .
           fi
           sed -i 's/nr_free_clusters/free_clusters/g' app/src/main/cpp/ntfs_jni.c
+          sed -i 's/unix_io|win32_io/unix_io|win32_io|acls|xattrs|object_id|reparse|efs/g' app/src/main/cpp/CMakeLists.txt
           find . -maxdepth 5 -exec touch {} +
 
       - name: Set up JDK 17
@@ -35,18 +36,12 @@ jobs:
           yes | sdkmanager --licenses > /dev/null || true
           sdkmanager "platforms;android-35" "build-tools;35.0.0" "cmake;3.22.1" "ndk;27.0.12077973"
 
-      - name: Fetch and configure ntfs-3g for Android NDK
+      - name: Fetch ntfs-3g source
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq autoconf automake libtool pkg-config
           mkdir -p app/src/main/cpp/ntfs-3g-src
           curl -L https://github.com/tuxera/ntfs-3g/archive/refs/tags/2022.10.3.tar.gz -o ntfs-3g.tar.gz
           tar -xzf ntfs-3g.tar.gz --strip-components=1 -C app/src/main/cpp/ntfs-3g-src
           rm ntfs-3g.tar.gz
-          cd app/src/main/cpp/ntfs-3g-src
-          ./autogen.sh
-          export CC="/usr/local/lib/android/sdk/ndk/27.0.12077973/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android26-clang"
-          ./configure --host=aarch64-linux-android --disable-ntfsprogs --disable-crypto --disable-quarantined --without-uuid --without-hd
-          cp config.h ../config.h
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
