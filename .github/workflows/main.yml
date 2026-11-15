@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Unzip project automatically
+      - name: Unzip and fix source automatically
         run: |
           for z in *.zip; do [ -f "$z" ] && unzip -q -o "$z"; done
           SETTINGS_PATH=$(find . -name "settings.gradle" | head -n 1)
@@ -19,6 +19,7 @@ jobs:
           if [ "$PROJECT_DIR" != "." ]; then
             cp -rf "$PROJECT_DIR"/* .
           fi
+          sed -i 's/nr_free_clusters/free_clusters/g' app/src/main/cpp/ntfs_jni.c
           find . -maxdepth 5 -exec touch {} +
 
       - name: Set up JDK 17
